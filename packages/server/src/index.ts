@@ -3,6 +3,7 @@ import multer from 'multer'
 import path from 'path'
 import cors from 'cors'
 import http from 'http'
+import https from 'https'
 import * as fs from 'fs'
 import basicAuth from 'express-basic-auth'
 import { Server } from 'socket.io'
@@ -663,12 +664,21 @@ export class App {
 }
 
 let serverApp: App | undefined
+let releaseSSLFilePath = '../../../ssl-cert/'
+let useHttps = true
 
 export async function start(): Promise<void> {
     serverApp = new App()
 
     const port = parseInt(process.env.PORT || '', 10) || 3000
-    const server = http.createServer(serverApp.app)
+
+    // host with https
+    const options = {
+        key: fs.readFileSync(releaseSSLFilePath + 'i10e.psyai.net.key'),
+        cert: fs.readFileSync(releaseSSLFilePath + 'i10e.psyai.net.pem')
+    };
+
+    const server = useHttps ? https.createServer(options, serverApp.app) : http.createServer(serverApp.app)
 
     const io = new Server(server, {
         cors: {
@@ -679,7 +689,7 @@ export async function start(): Promise<void> {
     await serverApp.initDatabase()
     await serverApp.config(io)
 
-    server.listen(port, () => {
+    server.listen(port, '0.0.0.0', () => {
         console.info(`⚡️[server]: Flowise Server is listening at ${port}`)
     })
 }

@@ -690,7 +690,7 @@ export async function start(): Promise<void> {
     await serverApp.config(io)
 
     server.listen(port, '0.0.0.0', () => {
-        console.info(`⚡️[server]: Flowise Server is listening at ${port}`)
+        console.info(`⚡️[server]: Flowise Server is listening at port of ${port}`)
     })
 }
 
